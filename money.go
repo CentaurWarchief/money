@@ -139,9 +139,8 @@ func (m Money) Allocate(ratios []float64) (results []*Money) {
 		)
 	}
 
-	for i := 0; r > 0; i++ {
+	for i := int64(0); i < r; i++ {
 		results[i].Amount++
-		r--
 	}
 
 	return results
