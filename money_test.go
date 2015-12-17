@@ -1,6 +1,7 @@
 package money_test
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/CentaurWarchief/money"
@@ -51,4 +52,26 @@ func TestAllocationOrder(t *testing.T) {
 
 	assert.Equal(t, int64(4), p[0].Amount)
 	assert.Equal(t, int64(1), p[1].Amount)
+}
+
+func TestAllocateTo(t *testing.T) {
+	m := money.NewMoney(15, money.EUR)
+	p := m.AllocateTo(2)
+
+	assert.Len(t, p, 2)
+	assert.Equal(t, int64(8), p[0].Amount)
+	assert.Equal(t, int64(7), p[1].Amount)
+}
+
+func TestComparators(t *testing.T) {
+	assert.True(t, money.NewMoney(0, money.EUR).IsZero())
+	assert.True(t, money.NewMoney(1, money.EUR).IsPositive())
+	assert.True(t, money.NewMoney(-1, money.EUR).IsNegative())
+}
+
+func TestMarshalJSON(t *testing.T) {
+	encoded, err := json.Marshal(money.NewMoney(150, money.Currency("GBP")))
+
+	assert.Nil(t, err)
+	assert.Equal(t, `{"amount":150,"currency":"GBP"}`, string(encoded))
 }

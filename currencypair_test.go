@@ -38,3 +38,20 @@ func TestConvertEurToUsd(t *testing.T) {
 	assert.Equal(t, int64(100), eur.Amount)
 	assert.Equal(t, eur.Currency, money.EUR)
 }
+
+func TestNewCurrencyPairFromInvalidIsoString(t *testing.T) {
+	for _, iso := range []string{
+		"",
+		"/",
+		"EUR/USD *****",
+		"EUR/USD -",
+		"EUR/USD 1.25#",
+		"EUR/USD",
+		"EUR",
+	} {
+		pair, err := money.NewCurrencyPairFromIso(iso)
+
+		assert.Nil(t, pair)
+		assert.Equal(t, money.ErrInvalidIsoPair, err, iso)
+	}
+}

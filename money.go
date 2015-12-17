@@ -1,6 +1,9 @@
 package money
 
-import "math"
+import (
+	"encoding/json"
+	"math"
+)
 
 type Money struct {
 	Amount   int64
@@ -108,6 +111,15 @@ func (m Money) Divide(money Money) (*Money, error) {
 	return NewMoney(int64((m.Amount / money.Amount)), m.Currency), nil
 }
 
+// Converts the current amount of money to the target currency
+// using the given rate
+func (m Money) Convert(target Currency, rate float64) *Money {
+	return NewMoney(
+		int64(float64(m.Amount)*rate),
+		target,
+	)
+}
+
 // Distributes the money amount by the given ratios
 func (m Money) Allocate(ratios []float64) (results []*Money) {
 	r := m.Amount
@@ -133,4 +145,29 @@ func (m Money) Allocate(ratios []float64) (results []*Money) {
 	}
 
 	return results
+}
+
+// Allocate the money among the number of targets
+func (m Money) AllocateTo(targets int) []*Money {
+	amount := int64(m.Amount / int64(targets))
+
+	results := make([]*Money, targets)
+
+	for i := 0; i < targets; i++ {
+		results[i] = NewMoney(amount, m.Currency)
+	}
+
+	for i := int64(0); i < (m.Amount % int64(targets)); i++ {
+		results[i].Amount++
+	}
+
+	return results
+}
+
+// Marshals the current representation to JSON
+func (m Money) MarshalJSON() ([]byte, error) {
+	return json.Marshal(map[string]interface{}{
+		"amount":   m.Amount,
+		"currency": m.Currency,
+	})
 }
