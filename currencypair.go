@@ -1,6 +1,9 @@
 package money
 
-import "regexp"
+import (
+	"regexp"
+	"strconv"
+)
 
 type CurrencyPair struct {
 	Base    Currency
@@ -21,15 +24,25 @@ func NewCurrencyPair(base, counter Currency, ratio float64) *CurrencyPair {
 // https://en.wikipedia.org/wiki/Currency_pair
 // https://en.wikipedia.org/wiki/ISO_4217
 func NewCurrencyPairFromIso(iso string) (*CurrencyPair, error) {
-	regex := regexp.MustCompile("^([A-Z]{2,3})/([A-Z]{2,3}) ([0-9]*\\.?[0-9]+)$")
+	regex := regexp.MustCompile("([A-Z]{2,3})/([A-Z]{2,3})\\s([0-9]*\\.?[0-9]+)$")
 
-	if !regex.Match([]byte(iso)) {
+	if !regex.MatchString(iso) {
 		return nil, ErrInvalidIsoPair
 	}
 
-	regex.FindAllString(iso, -1)
+	matches := regex.FindAllStringSubmatch(iso, 3)[0][1:]
 
-	return nil, nil
+	ratio, err := strconv.ParseFloat(matches[2], 64)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return NewCurrencyPair(
+		Currency(matches[0]),
+		Currency(matches[1]),
+		float64(ratio),
+	), nil
 }
 
 // Converts from base to counter currency
