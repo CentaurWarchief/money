@@ -5,13 +5,7 @@ import (
 	"strconv"
 )
 
-type CurrencyPair struct {
-	Base    Currency
-	Counter Currency
-	Ratio   float64
-}
-
-// Creates a new currency pair based on the given ratio
+// NewCurrencyPair creates a new currency pair based on the given ratio
 func NewCurrencyPair(base, counter Currency, ratio float64) *CurrencyPair {
 	return &CurrencyPair{
 		base,
@@ -20,8 +14,7 @@ func NewCurrencyPair(base, counter Currency, ratio float64) *CurrencyPair {
 	}
 }
 
-// Creates the currency pair from ISO string
-// https://en.wikipedia.org/wiki/Currency_pair
+// NewCurrencyPairFromIso creates a CurrencyPair from ISO string
 // https://en.wikipedia.org/wiki/ISO_4217
 func NewCurrencyPairFromIso(iso string) (*CurrencyPair, error) {
 	regex := regexp.MustCompile("([A-Z]{2,3})/([A-Z]{2,3})\\s([0-9]*\\.?[0-9]+)$")
@@ -45,7 +38,15 @@ func NewCurrencyPairFromIso(iso string) (*CurrencyPair, error) {
 	), nil
 }
 
-// Converts from base to counter currency
+// CurrencyPair represents a pair of currencies with a conversion ratio
+// https://en.wikipedia.org/wiki/Currency_pair
+type CurrencyPair struct {
+	Base    Currency
+	Counter Currency
+	Ratio   float64
+}
+
+// Convert converts from base to counter currency
 func (p CurrencyPair) Convert(money *Money) (*Money, error) {
 	if !money.Currency.Equals(p.Base) {
 		return nil, ErrNotSameCurrency
